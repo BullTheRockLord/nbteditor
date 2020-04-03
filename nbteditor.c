@@ -44,6 +44,50 @@ long readLong(FILE *fp){
 	return ret;
 }
 
+float readFloat(FILE *fp){
+	
+	char *floatIn = malloc(sizeof(char) * 4);
+	char *floatOut = malloc(sizeof(char) * 4);
+
+	int readValues = fread(floatIn, 1, 4, fp);
+
+	if(floatIn == NULL){
+		printf("MEMORY ALLOCATION ERROR");
+		exit(13);
+	}
+
+	for(int i = 0; i < 4;i++){
+		floatOut[4 - i - 1] = floatIn[i];
+	}	
+
+	float *ret = floatOut;
+	
+	return *ret;
+	
+}
+
+double readDouble(FILE *fp){
+	
+	char *doubleIn = malloc(sizeof(char) * 8);
+	char *doubleOut = malloc(sizeof(char) * 8);
+
+	int readValues = fread(doubleIn, 1, 8, fp);
+
+	if(doubleOut == NULL){
+		printf("MEMORY ALLOCATION ERROR");
+		exit(13);
+	}
+
+	for(int i = 0; i < 8;i++){
+		doubleOut[8 - i - 1] = doubleIn[i];
+	}	
+
+	double *ret = doubleOut;
+	
+	return *ret;
+	
+}
+
 //Methods for keeping track of data indentsk
 
 int indentLevel = 0;
@@ -90,29 +134,28 @@ int tag_long(FILE *fp){
 }
 
 int tag_float(FILE *fp){
-	printf("FLoat being skipped\n");
-	fgetc(fp);
-	fgetc(fp);
-	fgetc(fp);
-	fgetc(fp);
+	float in = readFloat(fp);
+	printf("%.2f\n", in);
 }
 
 int tag_double(FILE *fp){	
-	printf("Double being skipped\n");
-	fgetc(fp);
-	fgetc(fp);
-	fgetc(fp);
-	fgetc(fp);
-	fgetc(fp);
-	fgetc(fp);
-	fgetc(fp);
-	fgetc(fp);
+	double in = readDouble(fp);
+	printf("%.2f\n", in);	
 }
 
 int tag_byte_array(FILE *fp){
+	int length = readInt(fp);
+	printf("\n");
+	for(int i = 0; i < length; i++){
+		printIndent();
 
-	printf("Ecountred byte array,killing");
-	exit(0);
+		short o = 0;
+		char in = fgetc(fp);
+
+		o = o + in;
+
+		printf("%d\n",o);	
+	}
 	return 0;
 }
 
@@ -157,13 +200,16 @@ int tag_list(FILE *fp){
 
 int tag_compound(FILE *fp){
 
+	printf("\n");	
 	indentLevel += 1;
+	printIndent();
 	int tag = nextTag(fp);
 	while(tag != 0){
 		printIndent();
 		tag = nextTag(fp);
 	}
 	indentLevel -= 1;
+	printf("\n");	
 	
 	return 0;
 }
