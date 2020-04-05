@@ -108,7 +108,7 @@ int readPayloadOfTag(int id, FILE *fp);
 int tag_byte(FILE *fp){
 	char in = fgetc(fp);
 
-	printf("%d\n", in);
+	printf("%d", in);
 
 	return 0;
 }
@@ -116,7 +116,7 @@ int tag_byte(FILE *fp){
 int tag_short(FILE *fp){
 	short payload = readShort(fp);
 
-	printf("%d\n", payload);
+	printf("%d", payload);
 
 	return 0;
 }
@@ -124,28 +124,35 @@ int tag_short(FILE *fp){
 int tag_int(FILE *fp){
 	int payload = readInt(fp);
 
-	printf("%d\n", payload);
+	printf("%d", payload);
 }
 
 int tag_long(FILE *fp){
 	long payload = readInt(fp);
 
-	printf("%ld\n", payload);
+	printf("%ld", payload);
 }
 
 int tag_float(FILE *fp){
 	float in = readFloat(fp);
-	printf("%.2f\n", in);
+	printf("%.2f", in);
 }
 
 int tag_double(FILE *fp){	
 	double in = readDouble(fp);
-	printf("%.2f\n", in);	
+	printf("%.2f", in);	
 }
 
 int tag_byte_array(FILE *fp){
 	int length = readInt(fp);
-	printf("\n");
+
+	if(length == 0){
+		printf("[]");
+		return 0;
+	}
+	
+	printf("[");
+
 	for(int i = 0; i < length; i++){
 		printIndent();
 
@@ -155,7 +162,14 @@ int tag_byte_array(FILE *fp){
 		o = o + in;
 
 		printf("%d\n",o);	
+		
+		if(i != length - 1){
+			printf(",");
+		}
+
 	}
+
+	printf("]\n");
 	return 0;
 }
 
@@ -179,7 +193,7 @@ int tag_string(FILE *fp){
 		name += 1;
 	}
 
-	printf("%s\n", nameStart);
+	printf("\"%s\"", nameStart);
 
 }
 
@@ -189,27 +203,42 @@ int tag_list(FILE *fp){
 	int length = readInt(fp);
 
 	if(length == 0){
-		printf("\n");
+		printf("[]");
 		return 0;
 	}
-
+	indentLevel += 1;
+	printf("\n");
 	for(int i = 0;i < length;i++){
+		printIndent();
 		readPayloadOfTag(tagId, fp);		
+		if(tagId != 10 && length - 1 != i){
+			printf("\n");
+		}
 	}	
+	indentLevel -= 1;
 }
 
 int tag_compound(FILE *fp){
 
-	printf("\n");	
+	printf("\n");
 	indentLevel += 1;
-	printIndent();
-	int tag = nextTag(fp);
-	while(tag != 0){
+
+	int tag = -10;
+	do{
 		printIndent();
 		tag = nextTag(fp);
-	}
+
+		if(tag == 0){
+			printf("END TAG\n");
+		}
+
+		if(tag != 10 && tag != 0){
+			printf("\n");
+		}
+
+	}while(tag != 0);
+
 	indentLevel -= 1;
-	printf("\n");	
 	
 	return 0;
 }
@@ -218,17 +247,24 @@ int tag_int_array(FILE *fp){
 	int length = readInt(fp);
 
 	if(length == 0){
-		printf("\n");
+		printf("[]");
 		return 0;
 	}
 	
 	indentLevel += 1;
+	
+	printf("[");
 
 	for(int i = 0;i<length;i++){
 		int payload = readInt(fp);
-		printIndent();
-		printf("%d\n", payload);	
+		if(i != length - 1){
+			printf("%d,", payload);
+		}else{
+			printf("%d",payload);
+		}	
 	}
+
+	printf("]");
 
 	indentLevel -= 1;
 
@@ -239,18 +275,24 @@ int tag_long_array(FILE *fp){
 	int length = readInt(fp);
 	
 	if(length == 0){
-		printf("\n");
+		printf("[]");
 		return 0;
 	}
 
 	indentLevel += 1;
+	
+	printf("[");
 
 	for(int i = 0;i<length;i++){
 		long payload = readLong(fp);
-		printIndent();
-		printf("%ld\n", payload);	
+		if(i != length - 1){
+			printf("%ld,", payload);	
+		}else{
+			printf("%ld", payload);
+		}
 	}
 
+	printf("]");
 	indentLevel -= 1;
 
 	return 0;
