@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 
+
 //Methods that read data in big endian and convert it to little endian
 short readShort(FILE *fp){
 	char byteOne = fgetc(fp);
@@ -87,27 +88,47 @@ void readTagHeader(FILE *fp, int& tagId, char*& name){
 
 	if(tagId == 0){
 		return;
-	}	
+	}
+	//if(tagId == -1){
+	//	tagId = 0;
+	//	return;
+//	}	
 
 	short lengthOfName = readShort(fp);
-	char *nameHolder = (char * ) malloc(lengthOfName);
-	
-	if(nameHolder == NULL){
-		std::cout << "MEMORY ALLOCATION FAIL";
-		exit(0);
+
+	if(feof(fp) == true){
+		std::cout << "END OF FILE" << std::endl;
+		std::cout << tagId;	
 	}
 
+	if(lengthOfName < 0){
+		std::cout << "NAME SIZE READ AS NEGATIVE, BAD!";
+		exit(12);	
+	}
+
+	char *nameHolder = (char *) malloc(lengthOfName * sizeof(char) + 1);
 	name = nameHolder;
+	
+	if(nameHolder == NULL){
+		std::cout << "HEADER READ METHOD";
+		std::cout << "MEMORY ALLOCATION FAIL";
+		exit(13);
+	}
 
 	if( lengthOfName > 0){
 		for(short i = 0; i < lengthOfName; i++){
 			char nextCharacter = fgetc(fp);
+			std::cout << nextCharacter;
 			*nameHolder = nextCharacter;
 			nameHolder += 1;
 		}
+		std::cout << std::endl;
 	}else{
 		name = NULL;
-	}	
+	}
+	
+
+	nameHolder = 0;	
 
 	return;
 }
@@ -157,7 +178,7 @@ TagByteArray* readByteArrayTag(FILE *fp){
 
 	if(byteArray == NULL){
 		std::cout << "MEMORY ALLOCATION FAILED";
-		exit(0);	
+		exit(13);	
 	}
 
 	tagByteArray->data = byteArray;
@@ -176,7 +197,7 @@ TagString* readStringTag(FILE *fp){
 
 	if(stringPayload == NULL){
 		std::cout << "ERROR IN MEMORY ALLOCATION";
-		exit(0);
+		exit(13);
 	}
 
 	tagString->data = stringPayload;
@@ -192,8 +213,61 @@ TagList* readListTag(FILE *fp){
 	char tagId = fgetc(fp);		
 	int numberOfTags = readInt(fp);
 
-					
+	Tag* *tags = (Tag**)malloc(sizeof(Tag*) * numberOfTags);	
 
+	TagList* tagList = new TagList();
+	tagList->tags = tags;
+
+	if(tags == NULL){
+		std::cout << "ERROR IN MEMORY ALLOCATION";
+		exit(13);
+	}
+
+	for(int i = 0; i < numberOfTags;i++){
+		switch (tagId) {
+			case 0:
+				std::cout << "ERROR IN TAG LIST, END TAG FOUND" << std::endl;
+				exit(13);
+			case 1:
+				*(tags + i) = readByteTag(fp);					
+				break;
+			case 2:
+				*(tags + i) = readShortTag(fp);		
+				break;
+			case 3:
+				*(tags + i) = readIntTag(fp);		
+				break;
+			case 4:
+				*(tags + i) = readLongTag(fp);		
+				break;
+			case 5:
+				*(tags + i) = readFloatTag(fp);		
+				break;
+			case 6:
+				*(tags + i) = readDoubleTag(fp);		
+				break;
+			case 7:
+				*(tags + i) = readByteArrayTag(fp);		
+				break;
+			case 8:
+				*(tags + i) = readStringTag(fp);		
+				break;
+			case 9:
+				*(tags + i) = readListTag(fp);		
+				break;
+			case 10:
+				*(tags + i) = readCompoundTag(fp);		
+				break;
+			case 11:
+				*(tags + i) = readIntArrayTag(fp);		
+				break;
+			case 12:
+				*(tags + i) = readLongArrayTag(fp);		
+				break;
+
+		}		
+	}
+	return tagList;
 }
 TagCompound* readCompoundTag(FILE *fp){
 
@@ -212,6 +286,7 @@ TagCompound* readCompoundTag(FILE *fp){
 		switch (tagId){
 			case 0:
 				tag = new Tag();
+				std::cout << "TAG END" << std::endl;
 				break;
 			case 1:
 				tag = readByteTag(fp);
@@ -261,26 +336,30 @@ TagCompound* readCompoundTag(FILE *fp){
 	tagCompound->numberOfTags = tagList.size();
 	tagCompound->tags = (Tag**)malloc(tagCompound->numberOfTags * sizeof(Tag*));
 
+
+	
 	for(int i = 0; i < tagList.size();i++){
-		*(tagCompound->tags + i) = tagList[i];
+		*(tagCompound->tags + (sizeof(Tag*) * i)) = tagList[i];
 	}
+
+	return tagCompound;
 
 }
 TagIntArray* readIntArrayTag(FILE *fp){
 	TagIntArray* tagIntArray = new TagIntArray();
 
 	int sizeOfArray = readInt(fp);
-	int * intArray = (int*)malloc(sizeOfArray * sizeof(char));
+	int * intArray = (int*)malloc(sizeOfArray * sizeof(int));
 
 	if(intArray == NULL){
 		std::cout << "MEMORY ALLOCATION FAILED";
-		exit(0);
+		exit(13);
 	}	
 
 	tagIntArray->intArray = intArray;
 	tagIntArray->sizeOfArray = sizeOfArray;
 	for(int i = 0; i < sizeOfArray;i++){
-		*(intArray + i) = readInt(fp);
+		*(intArray + (i * sizeof(int))) = readInt(fp);
 	}
 
 	return tagIntArray;
@@ -293,13 +372,13 @@ TagLongArray* readLongArrayTag(FILE *fp){
 
 	if(longArray == NULL){
 		std::cout << "MEMORY ALLOCATION FAIL";
-		exit(0);
+		exit(13);
 	}
 
 	tagLongArray->longArray = longArray;
 	tagLongArray->sizeOfArray = sizeOfArray;
 	for(int i = 0; i < sizeOfArray;i++){
-		*(longArray + i) = readLong(fp);
+		*(longArray + (i + sizeof(long))) = readLong(fp);
 	}
 
 	return tagLongArray;
