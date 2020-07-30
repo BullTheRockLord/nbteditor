@@ -118,11 +118,9 @@ void readTagHeader(FILE *fp, int& tagId, char*& name){
 	if( lengthOfName > 0){
 		for(short i = 0; i < lengthOfName; i++){
 			char nextCharacter = fgetc(fp);
-			std::cout << nextCharacter;
 			*nameHolder = nextCharacter;
 			nameHolder += 1;
 		}
-		std::cout << std::endl;
 	}else{
 		name = NULL;
 	}
@@ -276,7 +274,7 @@ TagCompound* readCompoundTag(FILE *fp){
 	int tagId = 0;
 	char * tagName;
 
-	std::vector<Tag*> tagList = std::vector<Tag*>();	
+	std::vector<Tag*> *tagList = new std::vector<Tag*>();	
 
 	do {
 		readTagHeader(fp, tagId, tagName);
@@ -286,7 +284,6 @@ TagCompound* readCompoundTag(FILE *fp){
 		switch (tagId){
 			case 0:
 				tag = new Tag();
-				std::cout << "TAG END" << std::endl;
 				break;
 			case 1:
 				tag = readByteTag(fp);
@@ -329,17 +326,19 @@ TagCompound* readCompoundTag(FILE *fp){
 		tag->tagId = tagId;
 		tag->name = tagName;
 
-		tagList.push_back(tag);
+		tagList->push_back(tag);
 
 	} while(tagId != 0);
 
-	tagCompound->numberOfTags = tagList.size();
-	tagCompound->tags = (Tag**)malloc(tagCompound->numberOfTags * sizeof(Tag*));
+	tagCompound->tagList = tagList;
 
+	if(tagCompound->tags == NULL){
+		std::cout << "MEMORY ALLOCATION ERROR";
+		exit(13);
+	}
 
-	
 	for(int i = 0; i < tagList.size();i++){
-		*(tagCompound->tags + (sizeof(Tag*) * i)) = tagList[i];
+		*(tagCompound->tags + (sizeof(Tag*) * i)) = (*(tagList))[i];
 	}
 
 	return tagCompound;

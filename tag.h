@@ -10,6 +10,7 @@ class Tag
 
 	int tagId;
 
+	virtual void printTag();
 };
 
 //All of the tags
@@ -18,36 +19,50 @@ class TagByte : public Tag
 {
 	public:
 	char data;
+
+	void printTag();
 };
 
 class TagShort : public Tag
 {
 	public:
 	short data;
+
+	void printTag();
 };
 
 class TagInt : public Tag
 {
 	public:
 	int data;
+
+	void printTag();
+
 };
 
 class TagLong : public Tag 
 {
 	public:
 	long data;
+	
+	void printTag();
+
 };
 
 class TagFloat : public Tag
 {
 	public:
 	float data;
+
+	void printTag();
 };
 
 class TagDouble : public Tag
 {
-	public:
+	public:	
 	double data;
+	
+	void printTag();
 };
 
 class TagByteArray : public Tag
@@ -57,6 +72,8 @@ class TagByteArray : public Tag
 	char * data;	
 
 //	~TagByteArray();
+//
+	void printTag();
 };
 
 class TagString : public Tag
@@ -66,7 +83,11 @@ class TagString : public Tag
 	char * data;
 
 //      ~TagString();
+//
+
+	void printTag();
 };
+
 
 class TagList : public Tag
 {
@@ -77,16 +98,18 @@ class TagList : public Tag
 	Tag* *tags;
 
 //	~TagList();
-		
+	
+	void printTag();	
 };
 
 class TagCompound : public Tag
 {
 	public:
-	int numberOfTags;
-	Tag* *tags;	
-	
-	~TagCompound();
+	std::vector<Tag*> *tagList;
+
+//	~TagCompound();
+
+	void printTag();
 };
 
 class TagIntArray : public Tag
@@ -96,6 +119,8 @@ class TagIntArray : public Tag
 	int *intArray;
 
 //	~TagIntArray();
+//
+	void printTag();
 };
 
 class TagLongArray : public Tag
@@ -105,6 +130,8 @@ class TagLongArray : public Tag
 	long *longArray;
 	
 //	~TagLongArray();
+//
+	void printTag();
 };
 
 
