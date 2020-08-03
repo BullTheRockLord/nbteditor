@@ -1,12 +1,15 @@
 #ifndef TAG_H
 #define TAG_H
 
+#include <stdlib.h>
+#include <vector>
+#include <string>
+
 //The base tag class
 class Tag
 {
 	public:
-	char *name;
-	bool singleLineTag;
+	std::string *name;
 
 	int tagId;
 

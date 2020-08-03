@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
-
+#include <string>
 
 //Methods that read data in big endian and convert it to little endian
 short readShort(FILE *fp){
@@ -82,7 +82,7 @@ double readDouble(FILE *fp){
 }
 
 //Read tag header method
-void readTagHeader(FILE *fp, int& tagId, char*& name){
+void readTagHeader(FILE *fp, int& tagId, std::string*& name){
 	char nextTagId = fgetc(fp); //The tag id is stored in a byte
 	tagId = nextTagId; //Convert it to a number
 
@@ -106,27 +106,18 @@ void readTagHeader(FILE *fp, int& tagId, char*& name){
 		exit(12);	
 	}
 
-	char *nameHolder = (char *) malloc(lengthOfName * sizeof(char) + 1);
-	name = nameHolder;
-	
-	if(nameHolder == NULL){
-		std::cout << "HEADER READ METHOD";
-		std::cout << "MEMORY ALLOCATION FAIL";
-		exit(13);
-	}
+	name = new std::string();	
 
 	if( lengthOfName > 0){
-		for(short i = 0; i < lengthOfName; i++){
+		for(short i = 0; i < lengthOfName;i++){
 			char nextCharacter = fgetc(fp);
-			*nameHolder = nextCharacter;
-			nameHolder += 1;
+			name->push_back(nextCharacter);	
 		}
 	}else{
-		name = NULL;
+		name = new std::string(); 
 	}
 	
-
-	nameHolder = 0;	
+		
 
 	return;
 }
@@ -272,7 +263,7 @@ TagCompound* readCompoundTag(FILE *fp){
 	TagCompound* tagCompound = new TagCompound();
 
 	int tagId = 0;
-	char * tagName;
+	std::string *tagName = NULL;
 
 	std::vector<Tag*> *tagList = new std::vector<Tag*>();	
 
@@ -331,17 +322,12 @@ TagCompound* readCompoundTag(FILE *fp){
 	} while(tagId != 0);
 
 	tagCompound->tagList = tagList;
+	tagCompound->name = new std::string();
 
-	if(tagCompound->tags == NULL){
+	if(tagCompound->tagList == NULL){
 		std::cout << "MEMORY ALLOCATION ERROR";
 		exit(13);
-	}
-
-	for(int i = 0; i < tagList.size();i++){
-		*(tagCompound->tags + (sizeof(Tag*) * i)) = (*(tagList))[i];
-	}
-
-	return tagCompound;
+	}	return tagCompound;
 
 }
 TagIntArray* readIntArrayTag(FILE *fp){

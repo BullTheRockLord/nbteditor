@@ -22,37 +22,37 @@ void Tag::printTag()
 void TagByte::printTag()
 {
 	printIndent();
-	std::cout << "\"" << name << "\"" << " : " << this->data << std::endl;
+	std::cout << "\"" << *name << "\"" << " : " << this->data << std::endl;
 }
 
 void TagShort::printTag()
 {	
 	printIndent();
-	std::cout << "\"" << name << "\"" << " : " << this->data << std::endl;
+	std::cout << "\"" << *name << "\"" << " : " << this->data << std::endl;
 }
 
 void TagInt::printTag()
 {
 	printIndent();
-	std::cout << "\"" << name << "\"" << " : " << this->data << std::endl;
+	std::cout << "\"" << *name << "\"" << " : " << this->data << std::endl;
 }
 
 void TagLong::printTag()
 {
 	printIndent();
-	std::cout << "\"" << name << "\"" << " : " << this->data << std::endl;
+	std::cout << "\"" << *name << "\"" << " : " << this->data << std::endl;
 }
 
 void TagFloat::printTag()
 {
 	printIndent();
-	std::cout << "\"" << name << "\"" << " : " << this->data << std::endl;
+	std::cout << "\"" << *name << "\"" << " : " << this->data << std::endl;
 }
 
 void TagDouble::printTag()
 {
 	printIndent();
-	std::cout << "\"" << name << "\"" << " : " << this->data << std::endl;
+	std::cout << "\"" << *name << "\"" << " : " << this->data << std::endl;
 }
 
 void TagByteArray::printTag()
@@ -71,10 +71,11 @@ void TagList::printTag()
 }
 
 void TagCompound::printTag(){
+	printIndent();
 	indent++;
-	std::cout << "\"" << name << "\"" << " : {" << this->tagList->size() << "}" << std::endl;
+	std::cout << "\"" << *name << "\"" << " : {" << this->tagList->size() << "}" << std::endl;
 	for(int i = 0; i < this->tagList->size();i++){	
-		Tag* tag = (*(this->taglist))[i];
+		Tag* tag = (*(this->tagList))[i];
 		if(tag->tagId == 0){
 			printIndent();
 			std::cout << "END TAG" << std::endl;

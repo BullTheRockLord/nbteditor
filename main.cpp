@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include <string.h>
+#include <string>
 
 //The method/function to create the root node in our tree
 TagCompound* create_root_tag(FILE *fp)
@@ -34,12 +34,12 @@ int main(int argc, const char * argv[])
 
 	TagCompound* rootCompound = create_root_tag(playerNbt);
 
+	std::string print_flag = "-p"; 
 	for(int i = 0; i < argc; i++){
-		char* p = "-p";
-		if(strcmp(argv[i], p)){
+		std::string this_arg = std::string(argv[i]);
+		if(this_arg.compare(print_flag) == 0){
 			print_tree(playerNbt, rootCompound);
-			return 0;	
-		}
+		}	
 	}
 
 	return 0;
