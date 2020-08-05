@@ -18,17 +18,29 @@ void Tag::printTag()
 	printIndent();
 	std::cout << "WRONG TAG" << std::endl;
 }
+std::string Tag::getLineString()
+{
+	return std::string("WRONG TAG METHOD");	
+}
 
 void TagByte::printTag()
 {
 	printIndent();
 	std::cout << "\"" << *name << "\"" << " : " << this->data << std::endl;
 }
+std::string TagByte::getLineString()
+{
+	return (*name + this->data); 
+}
 
 void TagShort::printTag()
 {	
 	printIndent();
 	std::cout << "\"" << *name << "\"" << " : " << this->data << std::endl;
+}
+std::string TagShort::printTag()
+{
+	return (*name + this->data);
 }
 
 void TagInt::printTag()

@@ -14,6 +14,7 @@ class Tag
 	int tagId;
 
 	virtual void printTag();
+	virtual std::string getLineString();
 };
 
 //All of the tags
@@ -24,6 +25,7 @@ class TagByte : public Tag
 	char data;
 
 	void printTag();
+	std::string getLineString();
 };
 
 class TagShort : public Tag
@@ -32,6 +34,7 @@ class TagShort : public Tag
 	short data;
 
 	void printTag();
+	std::string getLineString();
 };
 
 class TagInt : public Tag
@@ -40,7 +43,7 @@ class TagInt : public Tag
 	int data;
 
 	void printTag();
-
+	std::string getLineString();
 };
 
 class TagLong : public Tag 
@@ -49,7 +52,7 @@ class TagLong : public Tag
 	long data;
 	
 	void printTag();
-
+	std::string getLineString();
 };
 
 class TagFloat : public Tag
@@ -58,6 +61,7 @@ class TagFloat : public Tag
 	float data;
 
 	void printTag();
+	std::string getLineString(); 
 };
 
 class TagDouble : public Tag
@@ -66,6 +70,7 @@ class TagDouble : public Tag
 	double data;
 	
 	void printTag();
+	std::string getLineString();
 };
 
 class TagByteArray : public Tag
@@ -77,6 +82,7 @@ class TagByteArray : public Tag
 //	~TagByteArray();
 //
 	void printTag();
+	std::string getLineString();
 };
 
 class TagString : public Tag
@@ -89,6 +95,7 @@ class TagString : public Tag
 //
 
 	void printTag();
+	std::string getLineString();
 };
 
 
@@ -103,6 +110,7 @@ class TagList : public Tag
 //	~TagList();
 	
 	void printTag();	
+	std::string getLineString();
 };
 
 class TagCompound : public Tag
@@ -113,6 +121,7 @@ class TagCompound : public Tag
 //	~TagCompound();
 
 	void printTag();
+	std::string getLineString();
 };
 
 class TagIntArray : public Tag
@@ -124,6 +133,7 @@ class TagIntArray : public Tag
 //	~TagIntArray();
 //
 	void printTag();
+	std::string getLineString();
 };
 
 class TagLongArray : public Tag
@@ -135,6 +145,7 @@ class TagLongArray : public Tag
 //	~TagLongArray();
 //
 	void printTag();
+	std::string getLineString();
 };
 
 
