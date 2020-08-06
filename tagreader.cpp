@@ -182,18 +182,13 @@ TagString* readStringTag(FILE *fp){
 	TagString* tagString = new TagString();
 	
 	short sizeOfString = readShort(fp);
-	char * stringPayload = (char*)malloc(sizeOfString * sizeof(char));
+	std::string data = std::string(); 
 
-	if(stringPayload == NULL){
-		std::cout << "ERROR IN MEMORY ALLOCATION";
-		exit(13);
+	for(int i = 0; i < sizeOfString;i++){
+		data = data + std::string(1,fgetc(fp));
 	}
 
-	tagString->data = stringPayload;
-	tagString->lengthOfString = sizeOfString;
-	for(short i = 0; i < sizeOfString;i++){
-		*(stringPayload + i) = fgetc(fp);
-	}
+	tagString->data = new std::string(data);
 
 	return tagString;
 }

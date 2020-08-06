@@ -88,8 +88,7 @@ class TagByteArray : public Tag
 class TagString : public Tag
 {
 	public:
-	int lengthOfString;
-	char * data;
+	std::string* data;
 
 //      ~TagString();
 //

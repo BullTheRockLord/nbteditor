@@ -46,9 +46,46 @@ void editorRefreshScreen(){
 	std::cout << "\x1b[2J";
 	std::cout << "\x1b[H";
 }
-/**PRINT OUT TREE**/
-void printNBTTree(TagCompound* rootTag){
 
+/**PRINTING TRACKERS**/
+int line_number = 0;
+int tree_depth = 0;
+
+/**PRINTING METHODS**/
+void printNBTTag(Tag* tag){
+	line_number++;
+
+	switch(tag->tagId){
+		case 0:
+			std::cout << "~ EMPTY TAG, SHOULD NOT PRINT"
+		case 1:
+
+		case 2:
+
+		case 3:
+
+		case 4:
+
+		case 5:
+
+		case 6:
+
+		case 7:
+
+		case 9:
+
+		case 10:
+
+		case 11:
+
+		case 12:
+
+	}
+
+
+}
+void printNBTTree(TagCompound* rootTag){
+	
 }
 
 #endif

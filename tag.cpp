@@ -30,7 +30,7 @@ void TagByte::printTag()
 }
 std::string TagByte::getLineString()
 {
-	return (*name + this->data); 
+	return (*name + std::string(1, this->data)); 
 }
 
 void TagShort::printTag()
@@ -38,9 +38,9 @@ void TagShort::printTag()
 	printIndent();
 	std::cout << "\"" << *name << "\"" << " : " << this->data << std::endl;
 }
-std::string TagShort::printTag()
+std::string TagShort::getLineString()
 {
-	return (*name + this->data);
+	return (*name + std::to_string(this->data));
 }
 
 void TagInt::printTag()
@@ -48,11 +48,19 @@ void TagInt::printTag()
 	printIndent();
 	std::cout << "\"" << *name << "\"" << " : " << this->data << std::endl;
 }
+std::string TagInt::getLineString()
+{
+	return (*name + std::to_string(this->data));
+}
 
 void TagLong::printTag()
 {
 	printIndent();
 	std::cout << "\"" << *name << "\"" << " : " << this->data << std::endl;
+}
+std::string TagLong::getLineString()
+{
+	return (*name + std::to_string(this->data));
 }
 
 void TagFloat::printTag()
@@ -60,26 +68,45 @@ void TagFloat::printTag()
 	printIndent();
 	std::cout << "\"" << *name << "\"" << " : " << this->data << std::endl;
 }
+std::string TagFloat::getLineString()
+{
+	return (*name + std::to_string(this->data));
+}
 
 void TagDouble::printTag()
 {
 	printIndent();
 	std::cout << "\"" << *name << "\"" << " : " << this->data << std::endl;
 }
+std::string TagDouble::getLineString()
+{
+	return (*name + std::to_string(this->data));
+}
 
 void TagByteArray::printTag()
 {
-	printIndent();
+	printIndent(); //TODO
+}
+std::string TagByteArray::getLineString()
+{
+	return (*name + std::to_string(numberOfTags));
 }
 
 void TagString::printTag()
 {
-	printIndent();
+	printIndent(); //TODO
+}
+std::string TagString::getLineString()
+{
+	return (*name + *data);
 }
 
 void TagList::printTag()
 {
 	printIndent();	
+}
+std::string TagList::getLineString(){
+	return (*name + std::to_string(numberOfTags));
 }
 
 void TagCompound::printTag(){
@@ -101,14 +128,23 @@ void TagCompound::printTag(){
 	}
 	indent--;	
 }
+std::string TagCompound::getLineString(){
+	return (*name + std::to_string(tagList->size()));
+}
 
 void TagIntArray::printTag(){
 	printIndent();
+}
+std::string TagIntArray::getLineString(){
+	return std::string("NOT YET IMPLEMENTED"); 
 }
 
 
 void TagLongArray::printTag(){
 	printIndent();
+}
+std::string TagLongArray::getLineString(){
+	return std::string("NOT YET IMPLEMENTED");	
 }
 
 
