@@ -49,6 +49,7 @@ int main(int argc, const char * argv[])
 	char c;
 	while(true){
 		editorRefreshScreen();
+		printNbtTree(rootCompound);
 		std::cin >> c;
 		if(!iscntrl(c)){
 		}	

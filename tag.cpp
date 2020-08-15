@@ -129,7 +129,7 @@ void TagCompound::printTag(){
 	indent--;	
 }
 std::string TagCompound::getLineString(){
-	return (*name + std::to_string(tagList->size()));
+	return (*name + std::string(" {") + std::to_string(tagList->size()) + std::string("}"));
 }
 
 void TagIntArray::printTag(){

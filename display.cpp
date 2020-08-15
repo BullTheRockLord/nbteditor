@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+#include "tag.h"
+
 /*** TERMINAL RAW MODE ****/
 struct termios orig_termios;
 
@@ -41,51 +43,95 @@ void enableRawMode(){
 		exit(13);
 	}
 }
-/**TERMINAL CONTROL FUNCTIONS**/
-void editorRefreshScreen(){
-	std::cout << "\x1b[2J";
-	std::cout << "\x1b[H";
-}
 
 /**PRINTING TRACKERS**/
 int line_number = 0;
 int tree_depth = 0;
 
-/**PRINTING METHODS**/
-void printNBTTag(Tag* tag){
+/**TERMINAL CONTROL FUNCTIONS**/
+void editorRefreshScreen(){
+	std::cout << "\x1b[2J";
+	std::cout << "\x1b[H";
+
+	line_number = 0;
+	tree_depth = 0;
+}
+
+/**PRINTING METHODS DECLERATION**/
+void printNbtTree(TagCompound* rootTag);
+
+/**PRINTING METHODS DEFINITIONS**/
+void printLineStart(){
+
+	std::cout << line_number;	
+
+	short number_length = 1;
+	if(line_number > 10){
+		number_length++;	
+	}
+	if(line_number > 100){
+		number_length++;	
+	}
+
+	for(short i = 0; i < (4 - number_length);i++){
+		std::cout << " ";
+	}
+
+	for(short i = 0; i < tree_depth ; i++){
+		std::cout << "    ";	
+	}
+}
+
+void printNbtTag(Tag* tag){
 	line_number++;
+	printLineStart();	
+
+	if(line_number > 40){
+		return;	
+	}
 
 	switch(tag->tagId){
 		case 0:
-			std::cout << "~ EMPTY TAG, SHOULD NOT PRINT"
+			std::cout << "~ EMPTY TAG, SHOULD NOT PRINT";
+			break;
 		case 1:
-
 		case 2:
-
 		case 3:
-
 		case 4:
-
 		case 5:
-
 		case 6:
-
+			std::cout << tag->getLineString() << std::endl << "\r";
+			break;
 		case 7:
-
+			std::cout << std::string("TAG BYTE ARRAY") << std::endl << "\r";
+		case 8:
+			std::cout << tag->getLineString() << std::endl << "\r";
+			break;
 		case 9:
-
+			std::cout << std::string("TAG LIST") << std::endl << "\r";
+			break;
 		case 10:
-
+			std::cout << tag->getLineString() << std::endl << "\r";
+			printNbtTree((TagCompound*)tag);
 		case 11:
-
+			std::cout << std::string("TAG INT ARRAY") << std::endl << "\r";
+			break;
 		case 12:
+			std::cout << std::string("TAG LONG ARRAY") << std::endl << "\r";
+			break;
 
 	}
 
 
 }
-void printNBTTree(TagCompound* rootTag){
-	
+void printNbtTree(TagCompound* rootTag){
+	std::vector<Tag*> *tagList = rootTag->tagList;
+	tree_depth++;
+	for(int i = 0; i < tagList->size();i++){
+		Tag* tag_pointer = (*(tagList))[i];
+		printNbtTag(tag_pointer);	
+	}
+	tree_depth--;
 }
 
 #endif
