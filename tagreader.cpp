@@ -336,10 +336,10 @@ TagIntArray* readIntArrayTag(FILE *fp){
 		exit(13);
 	}	
 
-	tagIntArray->intArray = intArray;
-	tagIntArray->sizeOfArray = sizeOfArray;
+	
+	tagIntArray->int_array = new std::vector<int>();
 	for(int i = 0; i < sizeOfArray;i++){
-		*(intArray + (i * sizeof(int))) = readInt(fp);
+		tagIntArray->int_array->push_back(readInt(fp));
 	}
 
 	return tagIntArray;

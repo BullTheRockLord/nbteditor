@@ -1,6 +1,5 @@
 #include "tag.h"
 #include "tagreader.h"
-#include "display.cpp"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -26,6 +25,12 @@ TagCompound* create_root_tag(FILE *fp)
 void print_tree(FILE *fp, TagCompound* rootTag){
 	rootTag->printTag();
 }
+
+//Include some symbols from the display translation unit
+void editorRefreshScreen();
+void printNbtTree(TagCompound* rootTag);
+void enableRawMode();
+void process_display_input(std::string input);
 
 //The main method
 int main(int argc, const char * argv[])
@@ -56,6 +61,7 @@ int main(int argc, const char * argv[])
 		if(c == 'q'){
 			break;
 		}
+		process_display_input(std::string(1,c));
 	}
 
 	return 0;

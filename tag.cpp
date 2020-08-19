@@ -1,4 +1,5 @@
 #include "tag.h"
+#include "output_helper.cpp"
 
 #include <stdlib.h>
 #include <iostream>
@@ -30,7 +31,7 @@ void TagByte::printTag()
 }
 std::string TagByte::getLineString()
 {
-	return (*name + std::string(1, this->data)); 
+	return (*name + std::string(" : ") + byte_to_hex(data));
 }
 
 void TagShort::printTag()
@@ -40,7 +41,7 @@ void TagShort::printTag()
 }
 std::string TagShort::getLineString()
 {
-	return (*name + std::to_string(this->data));
+	return (*name + std::string(" : ") + std::to_string(this->data));
 }
 
 void TagInt::printTag()
@@ -50,7 +51,7 @@ void TagInt::printTag()
 }
 std::string TagInt::getLineString()
 {
-	return (*name + std::to_string(this->data));
+	return (*name + std::string(" : ") +  std::to_string(this->data));
 }
 
 void TagLong::printTag()
@@ -60,7 +61,7 @@ void TagLong::printTag()
 }
 std::string TagLong::getLineString()
 {
-	return (*name + std::to_string(this->data));
+	return (*name + std::string(" : ") + std::to_string(this->data));
 }
 
 void TagFloat::printTag()
@@ -70,7 +71,7 @@ void TagFloat::printTag()
 }
 std::string TagFloat::getLineString()
 {
-	return (*name + std::to_string(this->data));
+	return (*name + std::string(" ") + std::to_string(this->data));
 }
 
 void TagDouble::printTag()
@@ -80,7 +81,7 @@ void TagDouble::printTag()
 }
 std::string TagDouble::getLineString()
 {
-	return (*name + std::to_string(this->data));
+	return (*name + std::string(" : ") + std::to_string(this->data));
 }
 
 void TagByteArray::printTag()
@@ -98,7 +99,7 @@ void TagString::printTag()
 }
 std::string TagString::getLineString()
 {
-	return (*name + *data);
+	return (*name + std::string(" : \"") + *data + std::string("\""));
 }
 
 void TagList::printTag()
@@ -112,7 +113,7 @@ std::string TagList::getLineString(){
 void TagCompound::printTag(){
 	printIndent();
 	indent++;
-	std::cout << "\"" << *name << "\"" << " : {" << this->tagList->size() << "}" << std::endl;
+	std::cout << "\"" << *name << "\"" << " : {" << (this->tagList->size() -  1 ) << "}" << std::endl;
 	for(int i = 0; i < this->tagList->size();i++){	
 		Tag* tag = (*(this->tagList))[i];
 		if(tag->tagId == 0){
@@ -129,14 +130,25 @@ void TagCompound::printTag(){
 	indent--;	
 }
 std::string TagCompound::getLineString(){
-	return (*name + std::string(" {") + std::to_string(tagList->size()) + std::string("}"));
+	return (*name + std::string(" {") + std::to_string(tagList->size() - 1) + std::string("}"));
 }
 
 void TagIntArray::printTag(){
 	printIndent();
 }
 std::string TagIntArray::getLineString(){
-	return std::string("NOT YET IMPLEMENTED"); 
+	std::string accumulator = *(this->name) + std::string(" [");
+
+	for(int i = 0; i < this->int_array->size();i++){
+		accumulator += std::to_string( (*(this->int_array))[i] );
+		if(i < this->int_array->size() - 1){
+			accumulator += std::string(",");
+		}
+	}
+
+	accumulator += std::string("]");
+
+	return accumulator;
 }
 
 

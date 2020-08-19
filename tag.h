@@ -126,8 +126,7 @@ class TagCompound : public Tag
 class TagIntArray : public Tag
 {
 	public:
-	int sizeOfArray;
-	int *intArray;
+	std::vector<int> *int_array;
 
 //	~TagIntArray();
 //
