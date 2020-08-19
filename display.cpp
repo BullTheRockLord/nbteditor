@@ -3,6 +3,7 @@
 
 #include <termios.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
 
 #include <iostream>
 
@@ -44,9 +45,23 @@ void enableRawMode(){
 	}
 }
 
+void get_terminal_dimensions(int& height, int& width){
+	struct winsize ws;
+
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
+
+	height = ws.ws_col;
+       	width = ws.ws_row;	
+}
+
 /**PRINTING TRACKERS**/
 int line_number = 0;
 int tree_depth = 0;
+
+int terminal_height = 0;
+int terminal_width = 0;
+
+int terminal_offset = 0; //The offset down ( scrolled lines down)
 
 /**TERMINAL CONTROL FUNCTIONS**/
 void editorRefreshScreen(){
@@ -55,6 +70,26 @@ void editorRefreshScreen(){
 
 	line_number = 0;
 	tree_depth = 0;
+
+	if(terminal_height == 0){
+		get_terminal_dimensions(terminal_height, terminal_width);
+	}
+}
+
+/**USER INPUT METHODS**/
+void process_display_input(std::string input){ //Display module gets to process any input 
+	if(input == "j"){
+		terminal_offset += 1;
+		if(terminal_offset >= (terminal_height + 10)){
+			terminal_offset -= 1;
+		}
+	}
+	if(input == "k"){
+		terminal_offset -= 1;
+		if(terminal_offset < 0){
+			terminal_offset += 1;	
+		}
+	}
 }
 
 /**PRINTING METHODS DECLERATION**/
@@ -83,48 +118,74 @@ void printLineStart(){
 }
 
 void printNbtTag(Tag* tag){
-	line_number++;
-	printLineStart();	
 
-	if(line_number > 40){
+	bool do_print = true;
+
+	if(line_number > terminal_height){
 		return;	
 	}
+	if(line_number < terminal_offset){
+		do_print = false;
+	}	
+
+	//Special case where we have a tag end, we should never print that
+	if(tag->tagId == 0){
+		return;
+	}
+
+	line_number++;
+	if(do_print)	
+		printLineStart();		
 
 	switch(tag->tagId){
-		case 0:
-			std::cout << "~ EMPTY TAG, SHOULD NOT PRINT";
-			break;
 		case 1:
 		case 2:
 		case 3:
 		case 4:
 		case 5:
 		case 6:
-			std::cout << tag->getLineString() << std::endl << "\r";
+			if(do_print)
+				std::cout << tag->getLineString() << std::endl << "\r";
 			break;
 		case 7:
-			std::cout << std::string("TAG BYTE ARRAY") << std::endl << "\r";
+			if(do_print)
+				std::cout << std::string("TAG BYTE ARRAY") << std::endl << "\r";	
 		case 8:
-			std::cout << tag->getLineString() << std::endl << "\r";
+			if(do_print)
+				std::cout << tag->getLineString() << std::endl << "\r";	
 			break;
 		case 9:
-			std::cout << std::string("TAG LIST") << std::endl << "\r";
+			if(do_print)
+				std::cout << std::string("TAG LIST") << std::endl << "\r";
 			break;
 		case 10:
-			std::cout << tag->getLineString() << std::endl << "\r";
+			if(do_print)
+				std::cout << tag->getLineString() << std::endl << "\r";
 			printNbtTree((TagCompound*)tag);
+			break;
 		case 11:
-			std::cout << std::string("TAG INT ARRAY") << std::endl << "\r";
+			if(do_print)
+				std::cout << tag->getLineString() << std::endl << "\r";
 			break;
 		case 12:
-			std::cout << std::string("TAG LONG ARRAY") << std::endl << "\r";
+			if(do_print)
+				std::cout << std::string("TAG LONG ARRAY") << std::endl << "\r";
 			break;
 
 	}
 
 
 }
-void printNbtTree(TagCompound* rootTag){
+void printNbtTree(TagCompound* rootTag){	
+	//Special case for the master root tag of the whole tree	
+	if(line_number == 0){
+		line_number++;
+		if(terminal_offset < 1){
+			printLineStart();
+			std::cout << "Root Tag {" << rootTag->tagList->size() << "}" << std::endl << "\r";
+		}
+	}
+		
 	std::vector<Tag*> *tagList = rootTag->tagList;
 	tree_depth++;
 	for(int i = 0; i < tagList->size();i++){

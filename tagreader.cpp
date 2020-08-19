@@ -162,18 +162,11 @@ TagDouble* readDoubleTag(FILE *fp){
 TagByteArray* readByteArrayTag(FILE *fp){
 	TagByteArray *tagByteArray = new TagByteArray();
 
-	int sizeOfArray = readInt(fp);
-	char * byteArray = (char*) malloc(sizeOfArray * sizeof(char));
+	int sizeOfArray = readInt(fp);	
 
-	if(byteArray == NULL){
-		std::cout << "MEMORY ALLOCATION FAILED";
-		exit(13);	
-	}
-
-	tagByteArray->data = byteArray;
-	tagByteArray->numberOfTags = sizeOfArray;
+	tagByteArray->char_array = new std::vector<char>();
 	for(int i = 0; i < sizeOfArray; i++){
-		*(byteArray + i) = fgetc(fp);		
+		(*(tagByteArray->char_array))[i] = fgetc(fp);
 	}
 
 	return tagByteArray;
@@ -329,17 +322,10 @@ TagIntArray* readIntArrayTag(FILE *fp){
 	TagIntArray* tagIntArray = new TagIntArray();
 
 	int sizeOfArray = readInt(fp);
-	int * intArray = (int*)malloc(sizeOfArray * sizeof(int));
-
-	if(intArray == NULL){
-		std::cout << "MEMORY ALLOCATION FAILED";
-		exit(13);
-	}	
-
-	tagIntArray->intArray = intArray;
-	tagIntArray->sizeOfArray = sizeOfArray;
+	
+	tagIntArray->int_array = new std::vector<int>();
 	for(int i = 0; i < sizeOfArray;i++){
-		*(intArray + (i * sizeof(int))) = readInt(fp);
+		tagIntArray->int_array->push_back(readInt(fp));
 	}
 
 	return tagIntArray;
