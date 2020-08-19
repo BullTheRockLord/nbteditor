@@ -322,6 +322,16 @@ TagIntArray* readIntArrayTag(FILE *fp){
 	TagIntArray* tagIntArray = new TagIntArray();
 
 	int sizeOfArray = readInt(fp);
+<<<<<<< HEAD
+=======
+	int * intArray = (int*)malloc(sizeOfArray * sizeof(int));
+
+	if(intArray == NULL){
+		std::cout << "MEMORY ALLOCATION FAILED";
+		exit(13);
+	}	
+
+>>>>>>> f8d6eb0d36bd1334a90cbd880b16055f2de6bf0b
 	
 	tagIntArray->int_array = new std::vector<int>();
 	for(int i = 0; i < sizeOfArray;i++){
