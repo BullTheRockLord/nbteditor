@@ -31,7 +31,11 @@ void TagByte::printTag()
 }
 std::string TagByte::getLineString()
 {
-	return (*name + std::string(" : ") + byte_to_hex(data));
+	if(name != 0){
+		return (*name + std::string(" : ") + byte_to_hex(data));
+	}else{
+		return (byte_to_hex(data)); 	
+	}
 }
 
 void TagShort::printTag()
@@ -41,7 +45,11 @@ void TagShort::printTag()
 }
 std::string TagShort::getLineString()
 {
-	return (*name + std::string(" : ") + std::to_string(this->data));
+	if(name != 0){
+		return (*name + std::string(" : ") + std::to_string(this->data));
+	}else{
+		return (std::to_string(this->data));
+	}
 }
 
 void TagInt::printTag()
@@ -51,7 +59,12 @@ void TagInt::printTag()
 }
 std::string TagInt::getLineString()
 {
-	return (*name + std::string(" : ") +  std::to_string(this->data));
+	if(name != 0){
+		return (*name + std::string(" : ") + std::to_string(this->data));
+	}else{
+		return (std::to_string(this->data));
+	}
+
 }
 
 void TagLong::printTag()
@@ -61,7 +74,11 @@ void TagLong::printTag()
 }
 std::string TagLong::getLineString()
 {
-	return (*name + std::string(" : ") + std::to_string(this->data));
+	if(name != 0){
+		return (*name + std::string(" : ") + std::to_string(this->data));
+	}else{
+		return (std::to_string(this->data));
+	}
 }
 
 void TagFloat::printTag()
@@ -71,7 +88,11 @@ void TagFloat::printTag()
 }
 std::string TagFloat::getLineString()
 {
-	return (*name + std::string(" ") + std::to_string(this->data));
+	if(name != 0){
+		return (*name + std::string(" : ") + std::to_string(this->data));
+	}else{
+		return (std::to_string(this->data));
+	}
 }
 
 void TagDouble::printTag()
@@ -81,7 +102,11 @@ void TagDouble::printTag()
 }
 std::string TagDouble::getLineString()
 {
-	return (*name + std::string(" : ") + std::to_string(this->data));
+	if(name != 0){
+		return (*name + std::string(" : ") + std::to_string(this->data));
+	}else{
+		return (std::to_string(this->data));
+	}
 }
 
 void TagByteArray::printTag()
@@ -110,7 +135,11 @@ void TagString::printTag()
 }
 std::string TagString::getLineString()
 {
-	return (*name + std::string(" : \"") + *data + std::string("\""));
+	if(name != 0){	
+		return (*name + std::string(" : \"") + *data + std::string("\""));
+	}else{
+		return (*data);
+	}
 }
 
 void TagList::printTag()
@@ -118,13 +147,13 @@ void TagList::printTag()
 	printIndent();	
 }
 std::string TagList::getLineString(){
-	return (*name + std::to_string(numberOfTags));
+	return (*name + std::string(" {") + std::to_string(tag_list->size()) + std::string("} : "));
 }
 
 void TagCompound::printTag(){
 	printIndent();
 	indent++;
-	std::cout << "\"" << *name << "\"" << " : {" << (this->tagList->size() -  1 ) << "}" << std::endl;
+	std::cout << "\"" << *name << "\"" << " : {" << (this->tagList->size() -  1 ) << "} " << std::endl;
 	for(int i = 0; i < this->tagList->size();i++){	
 		Tag* tag = (*(this->tagList))[i];
 		if(tag->tagId == 0){
@@ -141,7 +170,11 @@ void TagCompound::printTag(){
 	indent--;	
 }
 std::string TagCompound::getLineString(){
-	return (*name + std::string(" {") + std::to_string(tagList->size() - 1) + std::string("}"));
+	if(name != 0){
+		return (*name + std::string(" {") + std::to_string(tagList->size() - 1) + std::string("} : "));
+	}else{
+		return std::string("TAGCOMPOUND");
+	}
 }
 
 void TagIntArray::printTag(){

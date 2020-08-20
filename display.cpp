@@ -117,6 +117,7 @@ void printLineStart(){
 	}
 }
 
+
 void printNbtTag(Tag* tag){
 
 	bool do_print = true;
@@ -155,8 +156,24 @@ void printNbtTag(Tag* tag){
 				std::cout << tag->getLineString() << std::endl << "\r";	
 			break;
 		case 9:
-			if(do_print)
-				std::cout << std::string("TAG LIST") << std::endl << "\r";
+			if(do_print){
+					std::cout << tag->getLineString();
+					TagList* tagList = dynamic_cast<TagList*>(tag);
+					if(tagList == 0){
+						std::cout << "INCORRECT CAST";
+						break;
+					}
+
+					std::vector<Tag*> *tag_vector = tagList->tag_list;
+					std::cout << " [";
+					for(int i = 0; i < tag_vector->size();i++){
+						Tag* tag_in_list = (*tag_vector)[i];
+						std::cout << tag_in_list->getLineString();
+						if(i < tag_vector->size() - 1)
+							std::cout << ",";
+					}		
+					std::cout << "]" << std::endl << "\r";
+			}
 			break;
 		case 10:
 			if(do_print)
@@ -182,7 +199,7 @@ void printNbtTree(TagCompound* rootTag){
 		line_number++;
 		if(terminal_offset < 1){
 			printLineStart();
-			std::cout << "Root Tag {" << rootTag->tagList->size() << "}" << std::endl << "\r";
+			std::cout << "Root Tag {" << rootTag->tagList->size() << "} : " << std::endl << "\r";
 		}
 	}
 		
