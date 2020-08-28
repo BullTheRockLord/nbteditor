@@ -1,4 +1,5 @@
 #include "tag.h"
+#include "tag.h"
 #include "tagreader.h"
 
 #include <stdio.h>
@@ -7,30 +8,22 @@
 #include <string>
 
 //The method/function to create the root node in our tree
-TagCompound* create_root_tag(FILE *fp)
-{	
+TagCompound* create_root_tag(FILE *fp){	
 	//Get rid of the start tag
 	//Otherwise we will always be nested one deep too many
 	fgetc(fp);
 	fgetc(fp);
 	fgetc(fp);
 
+	
 	//Now we can read the compound tag
 	TagCompound* tagCompound = readCompoundTag(fp); 	
 
 	return tagCompound;
 }
 
-//The print method
-void print_tree(FILE *fp, TagCompound* rootTag){
-	rootTag->printTag();
-}
-
 //Include some symbols from the display translation unit
-void editorRefreshScreen();
-void printNbtTree(TagCompound* rootTag);
-void enableRawMode();
-void process_display_input(std::string input);
+void enter_interactive_mode(TagCompound* root_compound);
 
 //The main method
 int main(int argc, const char * argv[])
@@ -44,25 +37,11 @@ int main(int argc, const char * argv[])
 	for(int i = 0; i < argc; i++){
 		std::string this_arg = std::string(argv[i]);
 		if(this_arg.compare(print_flag) == 0){
-			print_tree(playerNbt, rootCompound);
 			return 0;
 		}	
 	}
 
-	enableRawMode();	
-
-	char c;
-	while(true){
-		editorRefreshScreen();
-		printNbtTree(rootCompound);
-		std::cin >> c;
-		if(!iscntrl(c)){
-		}	
-		if(c == 'q'){
-			break;
-		}
-		process_display_input(std::string(1,c));
-	}
+	enter_interactive_mode(rootCompound);
 
 	return 0;
 }

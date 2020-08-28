@@ -306,15 +306,12 @@ TagCompound* readCompoundTag(FILE *fp){
 
 	} while(tagId != 0);
 
-	tagCompound->tagList = tagList;
+	tagCompound->tag_list = tagList;
 	tagCompound->name = new std::string();
 
-	if(tagCompound->tagList == NULL){
-		std::cout << "MEMORY ALLOCATION ERROR";
-		exit(13);
-	}	return tagCompound;
-
+	return tagCompound;
 }
+
 TagIntArray* readIntArrayTag(FILE *fp){
 	TagIntArray* tagIntArray = new TagIntArray();
 
@@ -331,17 +328,11 @@ TagLongArray* readLongArrayTag(FILE *fp){
 	TagLongArray* tagLongArray = new TagLongArray();
 
 	int sizeOfArray = readInt(fp);
-	long * longArray = (long*) malloc(sizeOfArray * sizeof(long));
 
-	if(longArray == NULL){
-		std::cout << "MEMORY ALLOCATION FAIL";
-		exit(13);
-	}
-
-	tagLongArray->longArray = longArray;
-	tagLongArray->sizeOfArray = sizeOfArray;
+	tagLongArray->long_array = new std::vector<long>();	
+	
 	for(int i = 0; i < sizeOfArray;i++){
-		*(longArray + (i + sizeof(long))) = readLong(fp);
+		tagLongArray->long_array->push_back(readLong(fp));
 	}
 
 	return tagLongArray;

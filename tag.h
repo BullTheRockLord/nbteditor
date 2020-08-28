@@ -74,10 +74,7 @@ class TagString : public Tag
 class TagList : public Tag
 {
 	public:
-	int tagId;
-
-	int numberOfTags;
-	Tag* *tags;
+	std::vector<Tag*> *tag_list;
 
 //	~TagList();
 };
@@ -85,7 +82,7 @@ class TagList : public Tag
 class TagCompound : public Tag
 {
 	public:
-	std::vector<Tag*> *tagList;
+	std::vector<Tag*> *tag_list;
 
 //	~TagCompound();
 	
@@ -102,9 +99,8 @@ class TagIntArray : public Tag
 class TagLongArray : public Tag
 {
 	public:
-	int sizeOfArray;
-	long *longArray;
-	
+	std::vector<long> *long_array;
+
 //	~TagLongArray();
 //
 	
