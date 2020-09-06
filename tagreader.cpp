@@ -127,17 +127,23 @@ TagByte* readByteTag(FILE *fp){
 	TagByte *tagByte = new TagByte();
 	tagByte->data = fgetc(fp);
 
+	tagByte->value_string = std::string(1, (tagByte->data));
+
 	return tagByte;	
 }
 TagShort* readShortTag(FILE *fp){
 	TagShort* tagShort = new TagShort();
 	tagShort->data = readShort(fp);
-	
+
+	tagShort->value_string = std::to_string((tagShort->data));
+
 	return tagShort;
 }
 TagInt* readIntTag(FILE *fp){
 	TagInt *tagInt = new TagInt();
 	tagInt->data = readInt(fp);
+
+	tagInt->value_string = std::to_string((tagInt->data));
 
 	return tagInt;
 }
@@ -145,17 +151,23 @@ TagLong* readLongTag(FILE *fp){
 	TagLong *tagLong = new TagLong();
 	tagLong->data = readLong(fp);
 
+	tagLong->value_string = std::to_string((tagLong->data));
+
 	return tagLong;
 }
 TagFloat* readFloatTag(FILE *fp){
 	TagFloat *tagFloat = new TagFloat();
 	tagFloat->data = readFloat(fp);
 
+	tagFloat->value_string = std::to_string((tagFloat->data));
+
 	return tagFloat;
 }
 TagDouble* readDoubleTag(FILE *fp){
 	TagDouble *tagDouble = new TagDouble();
 	tagDouble->data = readDouble(fp);
+
+	tagDouble->value_string = std::to_string((tagDouble->data));
 
 	return tagDouble;
 }
@@ -182,6 +194,7 @@ TagString* readStringTag(FILE *fp){
 	}
 
 	tagString->data = new std::string(data);
+	tagString->value_string = *(tagString->data);
 
 	return tagString;
 }

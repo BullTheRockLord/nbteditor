@@ -11,6 +11,8 @@ class Tag
 	public:
 	std::string *name;
 
+	std::string value_string;
+
 	int tagId;
 };
 
