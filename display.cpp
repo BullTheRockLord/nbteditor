@@ -67,6 +67,8 @@ struct Line{
 	int value_start;
 	int value_end;
 	Tag *tag_owner;	
+
+	struct Line *next_line;
 };
 struct Line *first_line = 0;
 struct Line *last_line = 0;
@@ -76,9 +78,98 @@ int indentation = 0; //The amount of tabs to at the start of each line list, rep
 * Functions that relate to the taking a nbt tree and generating a our line list from it
 */
 
+//Function prototyping
+void read_nbt_tree(TagCompound* root_tag);
+
+std::string* add_indent(std::string *line_string)
+{
+	for(int i = 0; i < indentation; i++){
+		(*(line_string)) = (*(line_string)) + std::string("\t");
+	}
+	return line_string;
+}
+
+std::string* get_value_string(Tag* tag) //Returns the value string for all type of tags except 9,10 (list, compound)
+{
+	return new std::string("value");
+}
+
 void read_nbt_tag(Tag* tag)
 {
+	struct Line *line = new struct Line;
+	line->next_line = 0;
 
+	//Set the owner of the tag, so later we know what tag to change the value/name of
+	line->tag_owner = tag;
+
+	//Fill out all the string information for the tag
+	std::string* line_string = new std::string();
+	line_string = add_indent(line_string);
+	(*(line_string)) = (*(line_string)) + "\"";	
+
+	line->name_start = line_string->length();	//Save the length of the string at this current point as the start of the name 	
+	(*(line_string)) = (*(line_string)) + (*(tag->name));	//Add the name
+	line->name_end = line_string->length(); //Save the length of the string as the name end
+
+	(*(line_string)) = (*(line_string)) + "\"";
+
+	//Do the tag specific formatting
+	switch(tag->tagId){
+		//All these type of tags have a very similar type of print out, formated as "name" : "value"
+		case 0:
+		case 1:
+		case 2:
+		case 3:
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+		case 8:
+		case 11:
+		case 12:
+		{		
+			(*(line_string)) = (*(line_string)) + " : \"";	
+
+			line->value_start = line_string->length();
+			(*(line_string)) = (*(line_string)) + (*(get_value_string(tag)));
+			line->value_end = line_string->length();
+
+			if(tag->tagId == 7 || tag->tagId == 11 || tag->tagId == 12){ //If we are one of the array type tags, then we need to account for the { and } 
+				line->value_start = line->value_start + 1;	
+				line->value_end = line->value_end - 1;
+			}
+			
+			//Add the line to our linked list
+			last_line->next_line = line;	
+			last_line = line;
+
+			return;
+		}
+		//9,10 are the compound and list tags, they have a unique format of "name", with the values being lines under it with a higher indent
+		case 9:
+		case 10:
+		{
+			last_line->next_line = line;
+			last_line = line;
+
+			line->value_start = -1;
+			line->value_end = -1;
+
+			if(tag->tagId == 9){
+				(*(line_string)) = (*(line_string)) + "TAG LIST";	
+				return;
+			};			
+			if(tag->tagId == 10){
+				(*(line_string)) = (*(line_string)) + "TAG Compound";	
+				TagCompound* tag_compound = static_cast<TagCompound*>(tag);	
+				indentation++;
+				read_nbt_tree(tag_compound);
+				indentation--;
+				return;
+			}	
+			break;
+		}
+	}	
 }
 void read_nbt_tree(TagCompound* root_tag)
 {
@@ -108,6 +199,12 @@ void read_nbt_tree(TagCompound* root_tag)
 void enter_interactive_mode(TagCompound* root_compound)
 {
 	read_nbt_tree(root_compound);
+	enableRawMode();
+	struct Line *current_line = first_line;	
+	while(current_line->next_line != 0){
+		std::cout << current_line->line_string << std::endl << "\r";
+		current_line = current_line->next_line;
+	}
 }
 
 #endif
