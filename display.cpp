@@ -6,53 +6,9 @@
 #include <sys/ioctl.h>
 
 #include <iostream>
+#include <sstream>
 
 #include "tag.h"
-
-/*** TERMINAL RAW MODE 
- *   Functions related to using to controlling the terminal raw mode
- * ****/
-struct termios orig_termios;
-
-void disableRawMode(){	
-	int result = tcsetattr(STDIN_FILENO,TCSAFLUSH,&orig_termios);
-	if(result == -1){
-		std::cout << "TSET FAIL 1 ";
-		exit(13);
-	}
-	std::cout << "\x1b[2J";
-	std::cout << "\x1b[H";
-}
-void enableRawMode(){
-	int result = tcgetattr(STDIN_FILENO, &orig_termios);
-	if(result == -1){
-		std::cout << "TSET FAIL 2 ";
-		exit(13);
-	}
-	atexit(disableRawMode);	
-
-	struct termios raw;
-	tcgetattr(STDIN_FILENO, &raw);
-
-	raw.c_lflag &= ~(ECHO | ICANON);
-	raw.c_oflag &= ~(OPOST);
-	raw.c_iflag &= ~(ICRNL | IXON);
-	raw.c_cc[VMIN] = 1;
-	raw.c_cc[VTIME] = 1;
-	result = tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
-	if(result == -1){
-		std::cout << "TSET FAIL 3";
-		exit(13);
-	}
-}
-void get_terminal_dimensions(int& height, int& width){
-	struct winsize ws;
-
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
-
-	height = ws.ws_col;
-       	width = ws.ws_row;	
-}
 
 /*** LINE LIST FUNCTIONS
  *   Functions that relate to the linked list structure that represents the lines we print out to the consoel
@@ -62,13 +18,10 @@ void get_terminal_dimensions(int& height, int& width){
 
 struct Line{
 	std::string line_string;		
-	int name_start;
-	int name_end;
-	int value_start;
-	int value_end;
 	Tag *tag_owner;	
 
 };
+
 std::vector<struct Line> line_vector = std::vector<struct Line>();
 int indentation = 0; //The amount of tabs to at the start of each line list, representing the depth in the tree
 
@@ -104,14 +57,10 @@ void read_nbt_tag(Tag* tag)
 	add_indent(line.line_string);	
 
 	line.line_string += "\""; 
-
-	line.name_start = line.line_string.length();	//Save the length of the string at this current point as the start of the name 	
 	//It is possible for the name to be blank, if so then we can't evaluate the pointer, now can we
 	if(tag->name != 0){
 		line.line_string += *(tag->name);	
 	}	
-	line.name_end = line.line_string.length(); //Save the length of the string as the name end
-
 	line.line_string  +=  "\"";
 
 	//Do the tag specific formatting
@@ -123,26 +72,15 @@ void read_nbt_tag(Tag* tag)
 			//Set the string value pointed to by line string as that string + the closing quotes for the name + the opening quotes for the next value
 			line.line_string += " : \"";	
 
-			//Add the value, and store the line
-			line.value_start = line.line_string.length();
 			std::string value_string;
 			get_value_string(tag, value_string);
 			line.line_string += value_string + "\"";
-			line.value_end = line.line_string.length();
 
-			if(tag->tagId == 7 || tag->tagId == 11 || tag->tagId == 12){ //If we are one of the array type tags, then we need to account for the { and } 
-				line.value_start = line.value_start + 1;	
-				line.value_end = line.value_end - 1;
-			}
-			
 			return;
 		}
 		//9,10 are the compound and list tags, they have a unique format of "name", with the values being lines under it with a higher indent
 		case 9 ... 10:
 		{
-			line.value_start = -1;
-			line.value_end = -1;
-
 			if(tag->tagId == 9){
 				line.line_string += "TAG LIST";	
 				return;
@@ -165,13 +103,7 @@ void read_nbt_tree(TagCompound* root_tag)
 	if(line_vector.size() == 0){
 		//This will be our root node 
 		line_vector.push_back(Line());
-		struct Line first_line = line_vector.back();
-
-		//Set all the values to 0, because none of the aspects of the root tree should be editable
-		first_line.name_start = -1;
-		first_line.name_end = -1;
-		first_line.value_start = -1;
-		first_line.value_end = -1;	
+		struct Line & first_line = line_vector.back();
 
 		//Set the string value
 		first_line.line_string = std::string("ROOT COMPOUND");
@@ -182,38 +114,130 @@ void read_nbt_tree(TagCompound* root_tag)
 		read_nbt_tag((*tag_list)[i]);
 	}
 }
+void print_out_lines(int start, int end = -1)
+{
+	if( end == - 1){
+		end =  line_vector.size();
+	}	
+	if(end > line_vector.size()){
+		end = line_vector.size();
+	}
+	for(int i = start; i < end;i++){
+		std::cout << i << " - " << line_vector[i].line_string << "\n\r";	
+	}
+}
+
+/**
+ * COMMAND FUNCTIONS
+ * Functions that call each command
+ */
+void print(std::stringstream & sstream) 
+{
+	//Check if there is argument present{{{{{{
+	if(sstream.str().empty()){
+		print_out_lines(0);	
+		return;	
+	}
+	std::string argument;
+	sstream >> argument;
+
+	//Check we have a range, like 10-20
+	int occurence = argument.find_first_of('-');
+	if(occurence != -1){
+		std::string string_number_1 = argument.substr(0, occurence);
+		std::string string_number_2 = argument.substr(occurence + 1);
+
+		int int_number_1 = atoi(string_number_1.c_str());
+		int int_number_2 = atoi(string_number_2.c_str()) + 1; //We add one to make it an inclusive range
+
+		print_out_lines(int_number_1, int_number_2);		
+
+		return;
+	}
+
+	//Check if we have a operation, like 10+5
+	occurence = argument.find_first_of('+');
+	if(occurence != -1){
+		std::string string_number_1 = argument.substr(0, occurence);
+		std::string string_number_2 = argument.substr(occurence + 1);
+
+		int int_number_1 = atoi(string_number_1.c_str());
+		int int_number_2 = atoi(string_number_2.c_str()) + 1; //Add one to make it an inclusive rangee
+		
+		int_number_2 += int_number_1; //Add the two numbers we parsed together
+
+		print_out_lines(int_number_1, int_number_2);		
+
+		return;
+	}	
+
+	//If we are left with anything else, we most likely only have a single number
+	int print_start = atoi(argument.c_str());
+	print_out_lines(print_start);
+
+}
+void quit(std::stringstream & sstream)
+{
+	exit(0);
+}
+//Searchs for line by word
+void search(std::stringstream & sstream)
+{
+	std::string search_term = sstream.str();
+	
+	//Find out where our search term ends
+	search_term = search_term.substr(search_term.find_first_of(' ') + 1);
+	if(search_term.empty()){
+		return;
+	}	
+
+	for(int i = 0; i < line_vector.size();i++){
+		if(line_vector[i].line_string.find(search_term) != -1){
+			std::cout << i << " - " << line_vector[i].line_string << "\n\r";	
+		}
+	}
+}
+
+
+typedef void (*CommandFunction) (std::stringstream &);
+
+#define NUMBEROFCOMMANDS 6
+const char *commandNames[NUMBEROFCOMMANDS] = {
+	"print",
+	"p",
+	"quit",
+	"q",
+	"search",
+	"s"
+};
+const CommandFunction commandFunctions[NUMBEROFCOMMANDS] = {
+	&print,
+	&print,
+	&quit,
+	&quit,
+	&search,
+	&search
+};
 
 /**
  * INTERACTIVE MODE FUNCTIONS
  * functions that relate to the interative mode, using the cursor to delete and modify nodes
  */
 
-int screen_offset = 0;
-int screen_height = 0;
-int screen_width = 0;
-int cursor_y = 0;
-int cursor_x = 0;
+//Instead of manually programming in each command, we wil just call the command function
 
-void refresh_screen()
+void process_command(std::string & command_line)
 {
-	//Clear the screen
-	std::cout << "\x1b[2J";
-	std::cout << "\x1b[H";
-
-	//Print out our lines	
-	for(int i = screen_offset; i < screen_height + screen_offset;i++){
-		if(i >= line_vector.size()){
-			break;
-		}
-		std::cout << i << "- " << line_vector[i].line_string << "\n\r";
-	}
-
-	//Move our cursor the the same position as before
-	for(int y = 0 ; y < cursor_y;y++){
-		std::cout << "\x1b[A";
-	}
-	for(int x = 0; x < cursor_x;x++){
-		std::cout << "\x1b[C";	
+	std::stringstream sstream = std::stringstream(command_line);	
+	
+	std::string command_word;
+	sstream >> command_word;
+	
+	for(int i = 0; i < NUMBEROFCOMMANDS;i++){
+		if(std::string(commandNames[i]) == command_word){
+			commandFunctions[i](sstream);	
+			return;
+		}	
 	}
 }
 
@@ -222,61 +246,15 @@ void enter_interactive_mode(TagCompound* root_compound)
 	//Generate our line vector	
 	read_nbt_tree(root_compound);
 
-	//Enter raw mode, so we can control input and output better
-	enableRawMode();
-	get_terminal_dimensions(screen_height, screen_width);
-
-	screen_height = 50;
-
-	//Do our inital printout of the screen
-	refresh_screen();
-	std::cout << "\x1b[H";
-
-
-	char c;
 	while(true){
-		std::cin >> c;
-		if(c == 'j'){
-			if(cursor_y == screen_height){
-				screen_offset += 1;
-				refresh_screen();	
-			}else{
-				cursor_y++;
-				std::cout << "\x1b[B";
-			}	
-		}
-		if(c == 'k'){
-			if(cursor_y == 0){
-				if(screen_offset > 0){
-					screen_offset -= 1;
-					refresh_screen();
-				}
-			}else{
-				std::cout << "\x1b[A";
-				cursor_y--;
-			}	
-		}
-		if(c == 'l'){
-			int line_number = screen_offset + cursor_y;
-			if(line_number >= line_vector.size())
-				continue;
-			if(line_vector[line_number].line_string.length() <= cursor_x){
-				continue;
-			}
-			cursor_x++;
-			std::cout << "\x1b[C";
-		}
-		if(c == 'h'){
-			cursor_x--;
-			std::cout << "\x1b[D";
-			if(cursor_x < 0){
-				cursor_x = 0;	
-			}
-		}
-		if(c == 'q'){
-			return;
-		}
-	}
+		std::cout << "nbteditor> ";
+		
+		std::string input;
+		std::getline(std::cin, input);
+		
+		process_command(input);
+
+	}		
 }
 
 #endif
