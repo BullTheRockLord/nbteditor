@@ -46,6 +46,12 @@ void get_value_string(Tag* tag,std::string & value_string) //Returns the value s
 
 void read_nbt_tag(Tag* tag)
 {
+
+	//Make sure we have a valid tag info to use
+	if(tag->tagId == 0){
+		return;
+	}
+
 	line_vector.push_back(Line());	
 	struct Line &line = line_vector.back();
 
@@ -79,25 +85,31 @@ void read_nbt_tag(Tag* tag)
 			return;
 		}
 		//9,10 are the compound and list tags, they have a unique format of "name", with the values being lines under it with a higher indent
-		case 9 ... 10:
+		case 9:
 		{
-			if(tag->tagId == 9){
-				line.line_string += "TAG LIST";	
-				return;
-			};			
-			if(tag->tagId == 10){
-				line.line_string += "TAG Compound";	
-				TagCompound* tag_compound = static_cast<TagCompound*>(tag);	
-				indentation++;
-				read_nbt_tree(tag_compound);
-				indentation--;
-				return;
-			}	
-			break;
+			line.line_string += " : Tag List";	
+			TagList* tag_list = static_cast<TagList*>(tag);
+			std::vector<Tag*> *tag_list_vector = tag_list->tag_list;
+			indentation++;	
+			for(int i = 0; i < tag_list_vector->size();i++){
+				Tag* tag_in_list = (*(tag_list_vector))[i];
+				read_nbt_tag(tag_in_list);
+			}
+			indentation--;
+			return;
+		}	
+		case 10:
+		{		
+			line.line_string += " : Tag Compound";	
+			TagCompound* tag_compound = static_cast<TagCompound*>(tag);	
+			indentation++;
+			read_nbt_tree(tag_compound);
+			indentation--;
+			return;
 		}
 	}	
-
 }
+
 void read_nbt_tree(TagCompound* root_tag)
 {
 	if(line_vector.size() == 0){
