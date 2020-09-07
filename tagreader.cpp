@@ -208,8 +208,6 @@ TagList* readListTag(FILE *fp){
 	TagList* tagList = new TagList();
 	tagList->tag_list = tag_vector;	
 
-	tagList->tagId = tagId;
-
 	for(int i = 0; i < numberOfTags;i++){
 		switch (tagId) {
 			case 0:
@@ -253,6 +251,7 @@ TagList* readListTag(FILE *fp){
 				break;
 
 		}		
+		tag_vector->back()->tagId = tagId;
 	}
 	return tagList;
 }
