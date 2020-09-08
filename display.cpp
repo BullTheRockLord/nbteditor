@@ -62,12 +62,10 @@ void read_nbt_tag(Tag* tag)
 	line.line_string = std::string();
 	add_indent(line.line_string);	
 
-	line.line_string += "\""; 
 	//It is possible for the name to be blank, if so then we can't evaluate the pointer, now can we
 	if(tag->name != 0){
 		line.line_string += *(tag->name);	
 	}	
-	line.line_string  +=  "\"";
 
 	//Do the tag specific formatting
 	switch(tag->tagId){
@@ -152,7 +150,12 @@ void print(std::stringstream & sstream)
 	}
 	std::string argument;
 	sstream >> argument;
-
+	
+	if(argument.empty()){
+		print_out_lines(0);
+		return;
+	}
+	
 	//Check we have a range, like 10-20
 	int occurence = argument.find_first_of('-');
 	if(occurence != -1){
@@ -184,8 +187,9 @@ void print(std::stringstream & sstream)
 	}	
 
 	//If we are left with anything else, we most likely only have a single number
+	//Print around that number
 	int print_start = atoi(argument.c_str());
-	print_out_lines(print_start);
+	print_out_lines(print_start-5, print_start+5);
 
 }
 void quit(std::stringstream & sstream)
