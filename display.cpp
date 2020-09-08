@@ -213,18 +213,57 @@ void search(std::stringstream & sstream)
 		}
 	}
 }
+//edit a line, given a number
+void edit(std::stringstream & sstream)
+{
+	std::string string_of_line_number;
+	sstream >> string_of_line_number;
+
+	int line_number = atoi(string_of_line_number.c_str());
+	if(line_number == 0){
+		return;
+	}
+
+	//Check that the this is a valid line
+	if(line_number >= line_vector.size() || line_number < 0){
+		std::cout << "Invalid line of tag to edit" << std::endl;
+	}
+	Line &line = line_vector[line_number];
+	Tag* tag = line.tag_owner;
+
+	//Check that this is a valid tag that can be edited
+	if(tag->tagId == 10){
+		std::cout << "Cannot edit the direct value of a compound tag" << std::endl;
+		return;
+	}
+	if(tag->tagId == 9){
+		std::cout << "Cannot edit the direct value of a compound list" << std::endl;
+		return;
+	}	
+
+	std::cout << "Current Value : \"" << tag->value_string << "\"" << std::endl;
+	std::cout << "New Value? : ";
+	
+	std::string input; 
+	std::cin >> input;
+
+	std::cout << input << std::endl;
+	
+}
 
 
 typedef void (*CommandFunction) (std::stringstream &);
 
-#define NUMBEROFCOMMANDS 6
+#define NUMBEROFCOMMANDS 8
 const char *commandNames[NUMBEROFCOMMANDS] = {
 	"print",
 	"p",
 	"quit",
 	"q",
 	"search",
-	"s"
+	"s",
+	"edit",
+	"e"
 };
 const CommandFunction commandFunctions[NUMBEROFCOMMANDS] = {
 	&print,
@@ -232,7 +271,9 @@ const CommandFunction commandFunctions[NUMBEROFCOMMANDS] = {
 	&quit,
 	&quit,
 	&search,
-	&search
+	&search,
+	&edit,
+	&edit
 };
 
 /**
