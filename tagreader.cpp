@@ -33,7 +33,7 @@ int readInt(FILE *fp){
 long readLong(FILE *fp){
 	unsigned long ret = 0;
 	
-	for(int i = 0; i < 4; i++){
+	for(int i = 0; i < 8; i++){
 		ret = ret << 8;
 		ret += (short) fgetc(fp);
 	}	
